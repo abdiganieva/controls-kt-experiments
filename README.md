@@ -6,6 +6,7 @@ Things to be clarified:
   - [ ] specifying attributes
   - [ ] specifying actions (typing , ui interaction)
   - [ ] running device in native mode
+  - [ ] clarify device lifecycle
 - [ ] running device in local mode (with gui)
 - [ ] running device in remote mode
   - [ ] remote web ui

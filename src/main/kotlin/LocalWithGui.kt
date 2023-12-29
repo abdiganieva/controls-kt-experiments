@@ -1,5 +1,6 @@
-package org.example
+package org.example.localgui
 
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import space.kscience.controls.api.Device
@@ -17,6 +18,8 @@ import java.time.Instant
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.milliseconds
+
+import space.kscience.controls.server.startDeviceServer
 
 interface IDemoDevice: Device {
     var timeScaleState: Double
@@ -106,6 +109,10 @@ suspend fun main() {
     manager.install("demo", device)
     // just register device
 //    deviceManager.registerDevice(NameToken("device"), device);
+
+    GlobalScope.launch {
+        startDeviceServer(manager)
+    }
 
     while (true) {
         delay(1000)
