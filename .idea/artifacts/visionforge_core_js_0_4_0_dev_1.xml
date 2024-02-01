@@ -1,0 +1,6 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="visionforge-core-js-0.4.0-dev-1">
+    <output-path>$USER_HOME$/projects/visionforge/visionforge-core/build/libs</output-path>
+    <root id="archive" name="visionforge-core-js-0.4.0-dev-1.jar" />
+  </artifact>
+</component>
