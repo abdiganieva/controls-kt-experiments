@@ -13,7 +13,7 @@ import space.kscience.dataforge.meta.transformations.MetaConverter
 import java.time.Instant
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 
 interface ISinCosDevice: Device {
@@ -46,14 +46,14 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(C
 //            metaDescriptor {
 //                type(ValueType.NUMBER)
 //            }
-            info = "Real to virtual time scale"
+//            info = "Real to virtual time scale"
         }
 
         val sinScale by mutableProperty(MetaConverter.double, ISinCosDevice::sinScaleState)
         val cosScale by mutableProperty(MetaConverter.double, ISinCosDevice::cosScaleState)
 
-        val sin by doubleProperty(read = ISinCosDevice::sinValue)
-        val cos by doubleProperty(read = ISinCosDevice::cosValue)
+        val sin by doubleProperty { sinValue() }
+        val cos by doubleProperty { cosValue() }
 
         val coordinates by metaProperty(
             descriptorBuilder = {
@@ -81,10 +81,8 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(C
                 read(cosScale)
                 read(timeScale)
             }
-            doRecurring(50.milliseconds) {
-                read(sin)
-                read(cos)
-                read(coordinates)
+            doRecurring(1.seconds) {
+                println("sin: ${read(sin)}; cos: ${read(cos)}; coords ${read(coordinates)}")
             }
         }
     }

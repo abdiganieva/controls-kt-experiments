@@ -13,12 +13,20 @@ repositories {
 val ktorVersion = "2.3.7"
 
 dependencies {
-    implementation("space.kscience:controls-core:0.2.1")
+
     testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.10")
 
 
-//    web ui
-    implementation("space.kscience:controls-server:0.2.1")
+//    смотреть зависисмости и актуальные версии здесь:
+//    https://maven.sciprog.center/#/kscience
+    implementation("space.kscience:controls-server:0.3.0-dev-4")
+    implementation("space.kscience:controls-core:0.3.0-dev-4")
+    implementation("space.kscience:controls-magix:0.3.0-dev-4")
+    implementation("space.kscience:magix-server:0.3.0-dev-4")
+    implementation("space.kscience:magix-rsocket:0.3.0-dev-4")
+
+    // web ui
+    // TODO: почему надо подключать?
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
@@ -26,7 +34,9 @@ dependencies {
     implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
     implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
 
-//    implementation("org.slf4j:slf4j-log4j12:2.0.9")
+    implementation("org.slf4j:slf4j-log4j12:2.0.9")
+
+//    implementation(spclibs.logback.classic)
 }
 
 tasks.test {
