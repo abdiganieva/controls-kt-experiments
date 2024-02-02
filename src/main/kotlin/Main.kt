@@ -24,6 +24,7 @@ suspend fun main(): Unit = coroutineScope {
     val manager = context.request(DeviceManager)
 
     val device = SinCosDevice.build(context, Meta.EMPTY)
+
     // register device and open it
     manager.install("demo", device)
     // just register device

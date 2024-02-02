@@ -13,7 +13,6 @@ import space.kscience.dataforge.meta.transformations.MetaConverter
 import java.time.Instant
 import kotlin.math.cos
 import kotlin.math.sin
-import kotlin.time.Duration.Companion.seconds
 
 
 interface ISinCosDevice: Device {
@@ -76,12 +75,15 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(C
         }
 
         override suspend fun ISinCosDevice.onOpen() {
+
             launch {
                 read(sinScale)
                 read(cosScale)
                 read(timeScale)
             }
-            doRecurring(1.seconds) {
+
+//            doRecurring(10.seconds) {
+            launch {
                 println("sin: ${read(sin)}; cos: ${read(cos)}; coords ${read(coordinates)}")
             }
         }
