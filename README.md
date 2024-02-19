@@ -1,5 +1,10 @@
 Experiments with [controls-kt](https://github.com/SciProgCentre/controls-kt)
 
+Для работы необходимо собрать локально последний коммит из dev ветки 
+[controls.kt](https://git.sciprog.center/kscience/controls-kt) и поменять на соответсвующую
+версию в [build.gradle.kts](build.gradle.kts).
+
+
 [//]: # (Things to be clarified:)
 
 [//]: # (- [x] project initialization)

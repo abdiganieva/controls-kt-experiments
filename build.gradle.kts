@@ -11,7 +11,8 @@ repositories {
     maven("https://repo.kotlin.link")
 }
 
-val controlsVersion = "0.3.0-dev-6-local"
+//val controlsVersion = "0.3.0-dev-6-local"
+val controlsVersion = "0.3.0-dev-6-16-02-24-local"
 //val controlsVersion = "0.3.0-dev-4"
 val ktorVersion = "2.3.7"
 
@@ -25,11 +26,13 @@ dependencies {
     implementation("space.kscience:controls-core:$controlsVersion")
     implementation("space.kscience:controls-magix:$controlsVersion")
     implementation("space.kscience:magix-server:$controlsVersion")
+    implementation("space.kscience:magix-api:$controlsVersion")
     implementation("space.kscience:magix-rsocket:$controlsVersion")
 
     // web ui
     // TODO: почему надо подключать?
     implementation("io.ktor:ktor-server-cio:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")

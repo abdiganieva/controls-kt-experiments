@@ -1,58 +1,134 @@
 import devices.SinCosDevice
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import space.kscience.controls.api.onPropertyChange
+import space.kscience.controls.api.propertyMessageFlow
 import space.kscience.controls.client.launchMagixService
 import space.kscience.controls.manager.DeviceManager
 import space.kscience.controls.manager.install
+import space.kscience.controls.server.startDeviceServer
+import space.kscience.controls.spec.read
+import space.kscience.controls.spec.write
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.request
 import space.kscience.dataforge.meta.Meta
 import space.kscience.magix.api.MagixEndpoint
-import space.kscience.magix.rsocket.rSocketWithTcp
+import space.kscience.magix.rsocket.rSocketWithWebSockets
 import space.kscience.magix.server.RSocketMagixFlowPlugin
 import space.kscience.magix.server.startMagixServer
 
 /// Create demo device and Magix server
 //  and connect to each other inside one program
+// Эта программа:
+// 1. Создает менеджер устройств (Нужен для взаимодействия девайсов с брокером Magix)
+// 2. Создает тестовое устройство SinCosDevice и регистрирует его в менеджере
+// 3. Запускает Magix endpoint, чтобы другие программы могли управлять тестовым устройством
 suspend fun main(): Unit = coroutineScope {
 
     /// Создание менеджера устройства
     val context = Context("clientContext") {
         plugin(DeviceManager)
     }
+
     // Создание девайс менеджера напрямую не рекомендовано
     // TODO: писать предупреждение, если девайс менеджер создается напрямую
     val manager = context.request(DeviceManager)
 
+    // создание тестового устройства
+    // QUESTION: можно ли типизировать мету для устройства?
     val device = SinCosDevice.build(context, Meta.EMPTY)
 
     // register device and open it
     manager.install("demo", device)
+
     // just register device
     // TODO: зачем нужнен этот метод?
     // manager.registerDevice(NameToken("device"), device);
 
-    // another method to add device
+    // another method to add device (на данный момент не работает)
+    // [обсуждение](https://mm.sciprog.center/spc/pl/q5r4zz5rqjdidctfk4gguwjity)
     // TODO: доделать
     // val device by manager.installing(SinCosDevice)
 
-    // Start magix (?) server (web ui by default = http://localhost:7777)
-    // Похоже, что поднимается только веб морда с возможностью синхронных запросов
-    // wireshark не показывает ничего больше
-    // TODO: почему используется дефолтный порт magix?
-    // startDeviceServer(manager, port = 7778)
+    // Start magix (?) server (web ui = http://localhost:7776)
+    // Поднимаем веб интерфейс менеджера устройств
+    // NOTE: при одновременной работе c Magix сервером надо поменять порт,
+    // чтобы он не конфликтовал с вебсокетами Magix
+    // TODO: поменять дефолтный порт, чтобы он не конфликтовал с Magix server
+    startDeviceServer(manager, port = 7776)
 
-    /// Запуск реального magix сервера
-    // TODO: что эта штука делает?
-    // TODO: почему не работает вместе со startDeviceServer,
-    //  даже если вручную выставить разные порты?
+    /// Запуск Magix сервера
+    // Без доп плагинов будет запущен websocket сервер на порте 7777.
+    // Впринципе этого дожно быть достаточно.
     startMagixServer(
-        RSocketMagixFlowPlugin(serverPort = 7778), //TCP rsocket support
+         RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
+        port = 7777 // порт для вебсокетов (выставлен дефолтный)
     )
 
-    /// Connect device manager to Magix server via RSocket
-    // TODO: сделать прямое подключение без TCP, когда оно будет имплементированно
-    val magixEndpoint = MagixEndpoint.rSocketWithTcp(
-        "localhost", port = 7778
-    )
-    manager.launchMagixService(magixEndpoint)
+
+    // Примеры управления девайсом напрямую (не через Magix)
+    run {
+        println("""
+        ${device.propertyDescriptors}
+        ${device.actionDescriptors}
+        """.trimIndent())
+    }
+
+    // 1. Управление девайсом по его интерфейсу
+    // Я так и не понял, правильное это использование или нет
+    // и зачем вообще нужен интерфейс устройства
+    run {
+        val time = device.time()
+        val sinScale = device.sinScaleState
+        // другие параметры типа sin не доступны, т.к. они не прописаны в интерфейсе
+        println("""Device attributes from interface:
+        time=$time
+        sinScale=$sinScale
+        sin=(unavailable from interface)
+        """.trimIndent())
+
+        // изменение атрибута через интерфейс
+        // NOTE: не уверен, что так правильно делать
+        device.sinScaleState = 2.0
+    }
+
+    // 2. Управление девайсом через "спеку" девайса (см companion в [SinCosDevice.kt](./devices/SinCosDevice.kt)).
+    // Это вроде как правильное обращение к девайсу
+    run {
+        // time не доступен таким методом, т.к. он не прописан в спеке
+        val sinScale = device.read(SinCosDevice.sinScale)
+        val sin = device.read(SinCosDevice.sin)
+        println("""Device attributes from spec:
+        time=(unavailable from spec)
+        sinScale=$sinScale
+        sin=$sin
+        """.trimIndent())
+
+        // изменение аттрибута в устройства
+        device.write(SinCosDevice.sinScale, 2.0)
+    }
+
+    // Подписка на все изменения
+    device.onPropertyChange {
+        println("catch general prop change: $this")
+    }
+
+    // Подписка на конкретное изменение
+    device.propertyMessageFlow("sin").onEach {
+        println("catch specific prop change (sin): $it")
+    }.launchIn(this)
+
+
+    // Подключение менеджера к Magix
+    // Необходимо для отправки изменений и реакции на сообщения из Magix
+    // NOTE: прямое подключение менеджера (без сокетов) к Magix пока невозможно
+    run {
+        val magixEndpoint = MagixEndpoint.rSocketWithWebSockets(
+            "localhost", port = 7777
+        )
+        manager.launchMagixService(magixEndpoint)
+    }
+
+    // см пример управления девайсом через Magix в [Remote.kt](./commands/Remote.kt)
 }

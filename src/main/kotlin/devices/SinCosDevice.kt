@@ -13,8 +13,12 @@ import space.kscience.dataforge.meta.transformations.MetaConverter
 import java.time.Instant
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.time.Duration.Companion.seconds
 
 
+// NOTE: !!! Это не интерфейс в обычном понимании, т.е. через него нельзя управлять девайсом.
+// NOTE: !!! Управление производится через DeviceSpec
+// QUESTION: Зачем нужен интерфейс?
 interface ISinCosDevice: Device {
     var timeScaleState: Double
     var sinScaleState: Double
@@ -82,9 +86,10 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(C
                 read(timeScale)
             }
 
-//            doRecurring(10.seconds) {
-            launch {
-                println("sin: ${read(sin)}; cos: ${read(cos)}; coords ${read(coordinates)}")
+            doRecurring(10.seconds) {
+                read(sin)
+//            launch {
+//                println("sin: ${read(sin)}; cos: ${read(cos)}; coords ${read(coordinates)}")
             }
         }
     }
