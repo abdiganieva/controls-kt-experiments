@@ -12,7 +12,7 @@ repositories {
 }
 
 //val controlsVersion = "0.3.0-dev-6-local"
-val controlsVersion = "0.3.0-dev-6-16-02-24-local"
+val controlsVersion = "0.3.0-dev-6-19-02-24-local"
 //val controlsVersion = "0.3.0-dev-4"
 val ktorVersion = "2.3.7"
 
