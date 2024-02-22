@@ -1,7 +1,6 @@
 package devices
 
 import kotlinx.coroutines.launch
-import space.kscience.controls.api.Device
 import space.kscience.controls.api.metaDescriptor
 import space.kscience.controls.spec.*
 import space.kscience.dataforge.context.Context
@@ -15,45 +14,33 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.time.Duration.Companion.seconds
 
-
-// NOTE: !!! Это не интерфейс в обычном понимании, т.е. через него нельзя управлять девайсом.
-// NOTE: !!! Управление производится через DeviceSpec
-// QUESTION: Зачем нужен интерфейс?
-interface ISinCosDevice: Device {
-    var timeScaleState: Double
-    var sinScaleState: Double
-    var cosScaleState: Double
+class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<SinCosDevice>(SinCosDevice, context, meta) {
+    var timeScaleState = 5000.0
+    var sinScaleState = 1.0
+    var cosScaleState = 1.0
 
     fun time(): Instant = Instant.now()
-    fun sinValue(): Double
-    fun cosValue(): Double
-}
 
-class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(Companion, context, meta), ISinCosDevice {
-    override var timeScaleState = 5000.0
-    override var sinScaleState = 1.0
-    override var cosScaleState = 1.0
-
-    override fun sinValue(): Double {
+    fun sinValue(): Double {
         return  sin(time().toEpochMilli().toDouble() / timeScaleState) * sinScaleState
     }
 
-    override fun cosValue(): Double = cos(time().toEpochMilli().toDouble() / timeScaleState) * cosScaleState
+    fun cosValue(): Double = cos(time().toEpochMilli().toDouble() / timeScaleState) * cosScaleState
 
-    companion object : DeviceSpec<ISinCosDevice>(), Factory<SinCosDevice> {
+    companion object : DeviceSpec<SinCosDevice>(), Factory<SinCosDevice> {
 
         override fun build(context: Context, meta: Meta) = SinCosDevice(context, meta)
 
         // register virtual properties based on actual object state
-        val timeScale by mutableProperty(MetaConverter.double, ISinCosDevice::timeScaleState) {
+        val timeScale by mutableProperty(MetaConverter.double, SinCosDevice::timeScaleState) {
 //            metaDescriptor {
 //                type(ValueType.NUMBER)
 //            }
 //            info = "Real to virtual time scale"
         }
 
-        val sinScale by mutableProperty(MetaConverter.double, ISinCosDevice::sinScaleState)
-        val cosScale by mutableProperty(MetaConverter.double, ISinCosDevice::cosScaleState)
+        val sinScale by mutableProperty(MetaConverter.double, SinCosDevice::sinScaleState)
+        val cosScale by mutableProperty(MetaConverter.double, SinCosDevice::cosScaleState)
 
         val sin by doubleProperty { sinValue() }
         val cos by doubleProperty { cosValue() }
@@ -78,7 +65,7 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<ISinCosDevice>(C
             write(cosScale, 1.0)
         }
 
-        override suspend fun ISinCosDevice.onOpen() {
+        override suspend fun SinCosDevice.onOpen() {
 
             launch {
                 read(sinScale)

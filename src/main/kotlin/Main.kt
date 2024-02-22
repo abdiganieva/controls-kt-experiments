@@ -43,7 +43,7 @@ suspend fun main(): Unit = coroutineScope {
     manager.install("demo", device)
 
     // just register device
-    // TODO: зачем нужнен этот метод?
+    // TODO: зачем нужен этот метод?
     // manager.registerDevice(NameToken("device"), device);
 
     // another method to add device (на данный момент не работает)
@@ -54,16 +54,16 @@ suspend fun main(): Unit = coroutineScope {
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств
     // NOTE: при одновременной работе c Magix сервером надо поменять порт,
-    // чтобы он не конфликтовал с вебсокетами Magix
+    // чтобы он не конфликтовал с веб сокетами Magix
     // TODO: поменять дефолтный порт, чтобы он не конфликтовал с Magix server
     startDeviceServer(manager, port = 7776)
 
     /// Запуск Magix сервера
     // Без доп плагинов будет запущен websocket сервер на порте 7777.
-    // Впринципе этого дожно быть достаточно.
+    // В принципе этого должно быть достаточно.
     startMagixServer(
          RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
-        port = 7777 // порт для вебсокетов (выставлен дефолтный)
+        port = 7777 // порт для веб сокетов (выставлен дефолтный)
     )
 
 
@@ -81,7 +81,7 @@ suspend fun main(): Unit = coroutineScope {
     run {
         val time = device.time()
         val sinScale = device.sinScaleState
-        // другие параметры типа sin не доступны, т.к. они не прописаны в интерфейсе
+        // Другие параметры типа sin не доступны, т.к. они не прописаны в интерфейсе
         println("""Device attributes from interface:
         time=$time
         sinScale=$sinScale
@@ -105,7 +105,7 @@ suspend fun main(): Unit = coroutineScope {
         sin=$sin
         """.trimIndent())
 
-        // изменение аттрибута в устройства
+        // изменение аттрибута устройства
         device.write(SinCosDevice.sinScale, 2.0)
     }
 

@@ -57,6 +57,8 @@ suspend fun main(): Unit = coroutineScope {
         println("catch general prop change: $this")
     }
 
+//    val flow = sendEndpoint.controlsPropertyFlow("controls-kt", Name.of("demo"), SinCosDevice.sin)
+
     // Подписка на конкретное изменение
     device.propertyMessageFlow("sin").onEach {
         println("catch specific prop change (sin): $it")
