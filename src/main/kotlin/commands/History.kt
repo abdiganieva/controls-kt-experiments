@@ -6,7 +6,7 @@ import kotlinx.datetime.toKotlinLocalDateTime
 import storage.StorageClient
 import java.time.temporal.ChronoUnit
 
-// Fetch last 30 seconds of history
+// Fetch last 20 seconds of history
 suspend fun main() = coroutineScope {
     val start = java.time.LocalDateTime.now().minus(20, ChronoUnit.SECONDS).toKotlinLocalDateTime()
     val client = StorageClient()
