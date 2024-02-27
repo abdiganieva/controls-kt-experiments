@@ -14,9 +14,9 @@ import space.kscience.dataforge.names.Name
 import space.kscience.magix.api.MagixEndpoint
 import space.kscience.magix.rsocket.rSocketWithWebSockets
 
-
-/// Sends single test message to Magix
-// Пример управления удаленным девайсом через Magix
+// Этот пример показывает управление через DeviceClient.
+// This example fits the case when client need to use device properties heavily
+// (need access to almost device properties).
 // NOTE: для работы этого скрипта [Main.kt](../Main.kt) должен быть запущен
 suspend fun main(): Unit = coroutineScope {
 

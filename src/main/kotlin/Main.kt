@@ -17,6 +17,8 @@ import space.kscience.magix.api.MagixEndpoint
 import space.kscience.magix.rsocket.rSocketWithWebSockets
 import space.kscience.magix.server.RSocketMagixFlowPlugin
 import space.kscience.magix.server.startMagixServer
+import storage.startStorage
+import kotlin.io.path.Path
 
 /// Create demo device and Magix server
 //  and connect to each other inside one program
@@ -62,7 +64,7 @@ suspend fun main(): Unit = coroutineScope {
     // Без доп плагинов будет запущен websocket сервер на порте 7777.
     // В принципе этого должно быть достаточно.
     startMagixServer(
-         RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
+        RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
         port = 7777 // порт для веб сокетов (выставлен дефолтный)
     )
 
@@ -109,6 +111,9 @@ suspend fun main(): Unit = coroutineScope {
         device.write(SinCosDevice.sinScale, 2.0)
     }
 
+    // Подключение самодельного хранилища истории свойств девайса
+    manager.startStorage(8080, Path("data/controls-kt"))
+
     // Подписка на все изменения
     device.onPropertyChange {
         println("catch general prop change: $this")
@@ -125,10 +130,10 @@ suspend fun main(): Unit = coroutineScope {
     // NOTE: прямое подключение менеджера (без сокетов) к Magix пока невозможно
     run {
         val magixEndpoint = MagixEndpoint.rSocketWithWebSockets(
-            "localhost", port = 7777
+            "localhost", port = 7777,
         )
         manager.launchMagixService(magixEndpoint)
     }
 
-    // см пример управления девайсом через Magix в [Remote.kt](./commands/Remote.kt)
+    // см пример управления девайсом через Magix в [RemoteDevice.kt](./commands/RemoteDevice.kt)
 }
