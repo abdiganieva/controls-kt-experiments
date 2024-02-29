@@ -1,6 +1,6 @@
 package commands
 
-import devices.SinCosDevice
+import devices.ISinCosDevice
 import kotlinx.coroutines.coroutineScope
 import space.kscience.controls.client.controlsPropertyFlow
 import space.kscience.dataforge.names.Name
@@ -18,7 +18,7 @@ suspend fun main(): Unit = coroutineScope {
     )
 
     sendEndpoint.controlsPropertyFlow(
-        "controls-kt", Name.of("demo"), SinCosDevice.sin).collect {
+        "controls-kt", Name.of("demo"), ISinCosDevice.sin).collect {
             println("catch specific property change (sin): ${it}")
     }
 }

@@ -1,6 +1,6 @@
 package commands
 
-import devices.SinCosDevice
+import devices.ISinCosDevice
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -40,8 +40,8 @@ suspend fun main(): Unit = coroutineScope {
 
     run {
         // time не доступен таким методом, т.к. он не прописан в спеке
-        val sinScale = device.read(SinCosDevice.sinScale)
-        val sin = device.read(SinCosDevice.sin)
+        val sinScale = device.read(ISinCosDevice.sinScale)
+        val sin = device.read(ISinCosDevice.sin)
         println("""Device attributes from spec:
         time=(unavailable from spec)
         sinScale=$sinScale
@@ -49,7 +49,7 @@ suspend fun main(): Unit = coroutineScope {
         """.trimIndent())
 
         // изменение аттрибута в устройства
-        device.write(SinCosDevice.sinScale, 2.0)
+        device.write(ISinCosDevice.sinScale, 2.0)
     }
 
     // Подписка на все изменения

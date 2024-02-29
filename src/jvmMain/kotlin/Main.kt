@@ -1,3 +1,4 @@
+import devices.ISinCosDevice
 import devices.SinCosDevice
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -53,6 +54,8 @@ suspend fun main(): Unit = coroutineScope {
     // TODO: доделать
     // val device by manager.installing(SinCosDevice)
 
+//    device.onOpen()
+
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств
     // NOTE: при одновременной работе c Magix сервером надо поменять порт,
@@ -95,12 +98,12 @@ suspend fun main(): Unit = coroutineScope {
         device.sinScaleState = 2.0
     }
 
-    // 2. Управление девайсом через "спеку" девайса (см companion в [SinCosDevice.kt](./devices/SinCosDevice.kt)).
+    // 2. Управление девайсом через "спеку" девайса (см companion в [ISinCosDevice.kt](./devices/ISinCosDevice.kt)).
     // Это вроде как правильное обращение к девайсу
     run {
         // time не доступен таким методом, т.к. он не прописан в спеке
-        val sinScale = device.read(SinCosDevice.sinScale)
-        val sin = device.read(SinCosDevice.sin)
+        val sinScale = device.read(ISinCosDevice.sinScale)
+        val sin = device.read(ISinCosDevice.sin)
         println("""Device attributes from spec:
         time=(unavailable from spec)
         sinScale=$sinScale
@@ -108,7 +111,7 @@ suspend fun main(): Unit = coroutineScope {
         """.trimIndent())
 
         // изменение аттрибута устройства
-        device.write(SinCosDevice.sinScale, 2.0)
+        device.write(ISinCosDevice.sinScale, 2.0)
     }
 
     // Подключение самодельного хранилища истории свойств девайса
