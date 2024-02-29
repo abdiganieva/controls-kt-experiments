@@ -11,9 +11,12 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.*
+import kotlinx.serialization.json.Json
 import space.kscience.controls.api.PropertyChangedMessage
 import space.kscience.controls.manager.DeviceManager
 import space.kscience.controls.manager.hubMessageFlow
+import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.meta.toJson
 
 import java.io.File
 import java.nio.file.Path
@@ -36,7 +39,7 @@ import kotlin.io.path.listDirectoryEntries
             "${it.sourceDevice}")
         todayRoot.createDirectories()
         val tsvFile = File(Path(todayRoot.toString(), "${it.property}.tsv").toString())
-        tsvFile.appendText("${time.time}\t${it.value}\n") // TODO: round to milliseconds
+        tsvFile.appendText("${time.time}\t${it.value.toJson()}\n") // TODO: round to milliseconds
     }.launchIn(this.context)
 
     return embeddedServer(CIO, port = port) {
@@ -61,7 +64,7 @@ import kotlin.io.path.listDirectoryEntries
                     java.time.LocalDateTime.now()!!.toKotlinLocalDateTime()
                 }
 
-                val timeSeries = emptyList<Pair<LocalDateTime, String>>().toMutableList()
+                val timeSeries = emptyList<Pair<LocalDateTime, Meta>>().toMutableList()
                 dataRoot.listDirectoryEntries().sorted().forEach {
                     val date = LocalDateTime(LocalDate.parse(it.fileName.toString()), LocalTime(0,0,0))
                     val startDate = LocalDateTime(start.date, LocalTime(0,0,0))
@@ -72,7 +75,8 @@ import kotlin.io.path.listDirectoryEntries
                                 val (timeRaw, valueRaw) = it.split("\t")
                                 val timestamp = LocalDateTime(date.date, LocalTime.parse(timeRaw))
                                 if (timestamp in start..end) {
-                                    val entry = Pair(timestamp, valueRaw)
+                                    val json = Json.decodeFromString<Meta>(valueRaw)
+                                    val entry = Pair(timestamp, json)
                                     timeSeries += entry
                                 }
                             }
