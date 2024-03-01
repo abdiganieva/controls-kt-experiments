@@ -13,6 +13,7 @@ import space.kscience.magix.rsocket.rSocketWithWebSockets
 import storage.StorageClient
 import kotlin.time.Duration.Companion.seconds
 
+// declare external plotting functions defined in embedded script in index.html page
 external fun plot(y: Array<Double>)
 external fun plotHistory(x: Array<String>, y: Array<Double>)
 
