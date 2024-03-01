@@ -1,5 +1,7 @@
 plugins {
     kotlin("multiplatform") version "1.9.22"
+    // подключение compose-multiplatform - рекомендуемое средство визуализации (сейчас не используется)
+    // id("org.jetbrains.compose") version "1.5.12"
 }
 
 group = "org.example"
@@ -9,6 +11,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven("https://repo.kotlin.link")
+    // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 //val controlsVersion = "0.3.0-dev-6-local"
@@ -20,55 +23,48 @@ kotlin {
 
     explicitApi = null
     sourceSets {
-        jsMain {
+        commonMain {
             dependencies {
-                dependencies {
-                    implementation("space.kscience:magix-rsocket:$controlsVersion")
-                    implementation("io.ktor:ktor-client-js:$ktorVersion")
-//                    implementation("space.kscience:visionforge-compose-html:0.4.0-dev-1-local")
-                }
+                // зависимости, необходимые для задания спеки девайса в common модуле
+                implementation("space.kscience:controls-core:$controlsVersion")
+
+                // зависимости, необходимые для StorageClient
+                implementation("io.ktor:ktor-client-core:$ktorVersion")
+                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
             }
         }
 
-        commonMain {
+        jsMain {
             dependencies {
-                implementation("space.kscience:controls-core:$controlsVersion")
+                // зависимости, необходимые для работы с Magix на Js клиенте
                 implementation("space.kscience:controls-magix:$controlsVersion")
-                implementation("space.kscience:magix-api:$controlsVersion")
                 implementation("space.kscience:magix-rsocket:$controlsVersion")
+
+                // зависимости, необходимые для работы с StorageClient на Js клиенте
+                implementation("io.ktor:ktor-client-js:$ktorVersion")
+
+                // зависимости для построения графики с помощью compose-multiplatform (сейчас не используется)
+                // implementation(compose.runtime)
+                // implementation(compose.html.core)
             }
         }
 
         jvmMain {
             dependencies {
+                // Зависимости для работы Magix сервера
+                // смотреть актуальные версии здесь: https://maven.sciprog.center/#/kscience
 
-//                testImplementation("org.jetbrains.kotlin:kotlin-test:1.8.10")
-
-//    смотреть зависисмости и актуальные версии здесь:
-//    https://maven.sciprog.center/#/kscience
-                implementation("space.kscience:controls-server:$controlsVersion")
-                implementation("space.kscience:controls-core:$controlsVersion")
-                implementation("space.kscience:controls-magix:$controlsVersion")
-                implementation("space.kscience:magix-server:$controlsVersion")
-                implementation("space.kscience:magix-api:$controlsVersion")
+                // создание девайса (можно не подключать, т.к. уже есть в зависимостях common)
+                // implementation("space.kscience:controls-core:$controlsVersion")
+                implementation("space.kscience:controls-server:$controlsVersion") // startDeviceServer
+                implementation("space.kscience:magix-server:$controlsVersion") // startMagixServer
+                implementation("space.kscience:controls-magix:$controlsVersion") // launchMagixService
+                // клиентское подключение к Magix по RSocket (MagixEndpoint.rSocketWithWebSockets)
                 implementation("space.kscience:magix-rsocket:$controlsVersion")
 
-                // web ui
-                // TODO: почему надо подключать?
-                implementation("io.ktor:ktor-server-cio:$ktorVersion")
+                // зависимости, необходимые для реализации storage
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
-                implementation("io.ktor:ktor-server-websockets:$ktorVersion")
-                implementation("io.ktor:ktor-server-content-negotiation:$ktorVersion")
-                implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-                implementation("io.ktor:ktor-server-html-builder:$ktorVersion")
-                implementation("io.ktor:ktor-server-status-pages:$ktorVersion")
-
-//    implementation(project(":sincosdevice"))
-
-                implementation("org.slf4j:slf4j-log4j12:2.0.9")
-
-//    implementation(spclibs.logback.classic)
             }
         }
     }

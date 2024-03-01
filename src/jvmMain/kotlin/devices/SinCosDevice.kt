@@ -23,13 +23,11 @@ class SinCosDevice(context: Context, meta: Meta) : DeviceBySpec<SinCosDevice>(IS
     companion object : DeviceSpec<ISinCosDevice>(), Factory<SinCosDevice> {
         override fun build(context: Context, meta: Meta) = SinCosDevice(context, meta)
         override suspend fun ISinCosDevice.onOpen() {
-            println("Im here")
             launch {
                 read(ISinCosDevice.sinScale)
                 read(ISinCosDevice.cosScale)
                 read(ISinCosDevice.timeScale)
             }
-            println("tick")
             doRecurring(1.seconds) {
                 println("tick")
                 read(ISinCosDevice.sin)

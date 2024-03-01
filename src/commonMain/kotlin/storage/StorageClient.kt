@@ -2,7 +2,7 @@ package storage
 
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -11,9 +11,11 @@ import space.kscience.controls.spec.DevicePropertySpec
 import space.kscience.controls.spec.name
 import space.kscience.dataforge.meta.Meta
 
-class StorageClient(private val port: Int = 8080) {
-
-    private val client = HttpClient(CIO) {
+class StorageClient<T: HttpClientEngineConfig>(
+    engineFactory: HttpClientEngineFactory<T>,
+    private val port: Int = 8080
+) {
+    private val client = HttpClient(engineFactory) {
         install(ContentNegotiation) {
             json()
         }

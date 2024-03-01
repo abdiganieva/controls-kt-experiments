@@ -3,8 +3,28 @@
     <head>
         <meta charset="UTF-8">
         <title>Title</title>
+        <script src="https://cdn.plot.ly/plotly-2.29.1.min.js" charset="utf-8"></script>
     </head>
     <body>
+        <div id="plot-history"></div>
+        <div id="plot"></div>
+        <script>
+            function plotHistory(x, y) {
+                Plotly.newPlot('plot-history', [{
+                    x, y, mode: 'markers'
+                }], {
+                    title: 'History, last minute(refresh page to update)'
+                });
+            }
+            function plot(y) {
+                Plotly.newPlot(
+                    'plot',
+                    [{y, mode: 'lines'}],
+                    {title: 'controlsPropertyFlow live graph'}
+                );
+            }
+        </script>
+        <div id="root"></div>
         <script src="controls-kt-experiments.js"></script>
     </body>
 </html>

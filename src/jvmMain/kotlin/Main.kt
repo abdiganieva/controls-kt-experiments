@@ -1,5 +1,6 @@
 import devices.ISinCosDevice
 import devices.SinCosDevice
+import devices.SinCosDevice.Companion.onOpen
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -54,7 +55,9 @@ suspend fun main(): Unit = coroutineScope {
     // TODO: доделать
     // val device by manager.installing(SinCosDevice)
 
-//    device.onOpen()
+    // Пока девайс с интерфейсом надо запускать вручную (баг)
+    // TODO: исправить
+    device.onOpen()
 
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств
@@ -70,7 +73,6 @@ suspend fun main(): Unit = coroutineScope {
         RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
         port = 7777 // порт для веб сокетов (выставлен дефолтный)
     )
-
 
     // Примеры управления девайсом напрямую (не через Magix)
     run {
