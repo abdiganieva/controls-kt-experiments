@@ -36,7 +36,7 @@ class StorageClient<T: HttpClientEngineConfig>(
         return res.map {
             Pair(
                 it.first,
-                propertySpec.converter.metaToObject(it.second)
+                propertySpec.converter.read(it.second)
             )
         }
     }

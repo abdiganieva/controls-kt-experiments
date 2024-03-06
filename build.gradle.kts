@@ -9,14 +9,12 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
-    mavenLocal()
+//    mavenLocal()
     maven("https://repo.kotlin.link")
-    // maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
-//val controlsVersion = "0.3.0-dev-6-local"
-val controlsVersion = "0.3.0-dev-6-19-02-24-local"
-//val controlsVersion = "0.3.0-dev-4"
+val controlsVersion = "0.3.0"
 val ktorVersion = "2.3.7"
 
 kotlin {

@@ -31,8 +31,8 @@ import kotlin.io.path.listDirectoryEntries
 // NOTE: storage have no optimisation
 // NOTE: storage works only with flat properties (Int, Double etc., structures not supported)
  suspend fun DeviceManager.startStorage(port: Int, dataRoot: Path): ApplicationEngine {
-    this.hubMessageFlow(this.context).filterIsInstance<PropertyChangedMessage>().onEach {
-        val time = it.time!!.toLocalDateTime(timeZone = TimeZone.currentSystemDefault())
+    this.hubMessageFlow().filterIsInstance<PropertyChangedMessage>().onEach {
+        val time = it.time.toLocalDateTime(timeZone = TimeZone.currentSystemDefault())
         val todayRoot = Path(
             dataRoot.toString(),
             "${time.year}-${"%02d".format(time.monthNumber)}-${"%02d".format(time.dayOfMonth)}",

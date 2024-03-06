@@ -3,6 +3,7 @@ package commands
 import devices.ISinCosDevice
 import io.ktor.client.engine.js.*
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -39,8 +40,7 @@ suspend fun main(): Unit = coroutineScope {
         "localhost", 7777
     )
 
-    // TODO: этот блок лочит js, код после него не будет выполнен
-    run {
+    val res = launch {
         val container = mutableListOf<Double>()
         sendEndpoint.controlsPropertyFlow(
             "controls-kt", Name.of("demo"), ISinCosDevice.sin).collect {

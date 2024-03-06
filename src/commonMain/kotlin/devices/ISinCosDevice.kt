@@ -4,7 +4,7 @@ import space.kscience.controls.api.Device
 import space.kscience.controls.api.metaDescriptor
 import space.kscience.controls.spec.*
 import space.kscience.dataforge.meta.Meta
-import space.kscience.dataforge.meta.transformations.MetaConverter
+import space.kscience.dataforge.meta.MetaConverter
 
 interface ISinCosDevice : Device {
     var timeScaleState: Double

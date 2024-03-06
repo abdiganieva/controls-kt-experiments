@@ -66,11 +66,15 @@ suspend fun main(): Unit = coroutineScope {
     // TODO: поменять дефолтный порт, чтобы он не конфликтовал с Magix server
     startDeviceServer(manager, port = 7776)
 
+    // Подключение самодельного хранилища истории свойств девайса
+    manager.startStorage(8080, Path("data/controls-kt"))
+
     /// Запуск Magix сервера
     // Без доп плагинов будет запущен websocket сервер на порте 7777.
     // В принципе этого должно быть достаточно.
     startMagixServer(
         RSocketMagixFlowPlugin(serverPort = 7778), // опциональный TCP плагин
+        buffer = 1, // TODO: buffer = 0 not working
         port = 7777 // порт для веб сокетов (выставлен дефолтный)
     )
 
@@ -115,9 +119,6 @@ suspend fun main(): Unit = coroutineScope {
         // изменение аттрибута устройства
         device.write(ISinCosDevice.sinScale, 2.0)
     }
-
-    // Подключение самодельного хранилища истории свойств девайса
-    manager.startStorage(8080, Path("data/controls-kt"))
 
     // Подписка на все изменения
     device.onPropertyChange {
