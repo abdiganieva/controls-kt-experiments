@@ -3,3 +3,4 @@ plugins {
 }
 rootProject.name = "controls-kt-experiments"
 
+includeBuild("../../controls-kt")

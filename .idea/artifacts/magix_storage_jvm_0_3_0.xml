@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="magix-storage-jvm-0.3.0">
+    <output-path>$PROJECT_DIR$/../../controls-kt/magix/magix-storage/build/libs</output-path>
+    <root id="archive" name="magix-storage-jvm-0.3.0.jar">
+      <element id="module-output" name="controls-kt.magix.magix-storage.jvmMain" />
+    </root>
+  </artifact>
+</component>

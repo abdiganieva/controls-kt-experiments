@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="constructor-jvm-0.3.0">
+    <output-path>$PROJECT_DIR$/../../controls-kt/demo/constructor/build/libs</output-path>
+    <root id="archive" name="constructor-jvm-0.3.0.jar">
+      <element id="module-output" name="controls-kt.demo.constructor.jvmMain" />
+    </root>
+  </artifact>
+</component>

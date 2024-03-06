@@ -1,5 +1,6 @@
 plugins {
     kotlin("multiplatform") version "1.9.22"
+    id("io.ktor.plugin") version "2.3.7"
     // подключение compose-multiplatform - рекомендуемое средство визуализации (сейчас не используется)
     // id("org.jetbrains.compose") version "1.5.12"
 }
@@ -24,7 +25,7 @@ kotlin {
         commonMain {
             dependencies {
                 // зависимости, необходимые для задания спеки девайса в common модуле
-                implementation("space.kscience:controls-core:$controlsVersion")
+                implementation("space.kscience:controls-core:0.3.0")
 
                 // зависимости, необходимые для StorageClient
                 implementation("io.ktor:ktor-client-core:$ktorVersion")
@@ -60,7 +61,7 @@ kotlin {
                 implementation("space.kscience:controls-magix:$controlsVersion") // launchMagixService
                 // клиентское подключение к Magix по RSocket (MagixEndpoint.rSocketWithWebSockets)
                 implementation("space.kscience:magix-rsocket:$controlsVersion")
-
+                implementation("io.ktor:ktor-server-core:$ktorVersion")
                 // зависимости, необходимые для реализации storage
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
             }

@@ -30,9 +30,10 @@ suspend fun main(): Unit = coroutineScope {
         val out = client.read("demo", ISinCosDevice.sin, start=start)
 
         // отображение графика
-        val x = out.map { it.first.toString() }.toTypedArray()
-        val y = out.map { it.second }.toTypedArray()
-        plotHistory(x, y)
+        TODO()
+        //val x = out.map { it.first.toString() }.toTypedArray()
+        //val y = out.map { it.second }.toTypedArray()
+        //plotHistory(x, y)
     }
 
     // подключение к Magix
