@@ -22,11 +22,10 @@ class StorageClient<T: HttpClientEngineConfig>(
     }
 
     suspend fun <T> read(
-            device: String, propertySpec: DevicePropertySpec<*, T>,
-            start: LocalDateTime? = null,
-            end: LocalDateTime? = null
-        ) // List<Pair<LocalDateTime, T>>
-    {
+        device: String, propertySpec: DevicePropertySpec<*, T>,
+        start: LocalDateTime? = null,
+        end: LocalDateTime? = null
+    ): List<Pair<LocalDateTime, T>> {
         val res: List<Pair<LocalDateTime, Meta>> = client.get("http://localhost:${this@StorageClient.port}/history/${device}/${propertySpec.name}") {
             url {
                 if (start != null) parameters.append("start", start.toString())
@@ -34,11 +33,11 @@ class StorageClient<T: HttpClientEngineConfig>(
             }
         }.body()
 
-        /* return res.map {
+        return res.map {
             Pair(
                 it.first,
                 propertySpec.converter.read(it.second)
             )
-        } */
+        }
     }
 }

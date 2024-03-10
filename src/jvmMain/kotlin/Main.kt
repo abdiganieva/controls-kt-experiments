@@ -1,5 +1,7 @@
-import devices.ISinCosDevice
-import devices.SinCosDevice
+import devices.*
+import devices.CM32Device.Companion.onOpen
+import devices.MKSBaratronDevice.Companion.onOpen
+import devices.MeradatVacDevice.Companion.onOpen
 import devices.SinCosDevice.Companion.onOpen
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -42,9 +44,15 @@ suspend fun main(): Unit = coroutineScope {
     // создание тестового устройства
     // QUESTION: можно ли типизировать мету для устройства?
     val device = SinCosDevice.build(context, Meta.EMPTY)
+    val CM32device = CM32Device.build(context, Meta.EMPTY)
+    val meradat = MeradatVacDevice.build(context, Meta.EMPTY)
+    val baratron = MKSBaratronDevice.build(context, Meta.EMPTY)
 
     // register device and open it
     manager.install("demo", device)
+    manager.install("cm32", CM32device)
+    manager.install("meradat", meradat)
+    manager.install("baratron", baratron)
 
     // just register device
     // TODO: зачем нужен этот метод?
@@ -58,6 +66,9 @@ suspend fun main(): Unit = coroutineScope {
     // Пока девайс с интерфейсом надо запускать вручную (баг)
     // TODO: исправить
     device.onOpen()
+    CM32device.onOpen()
+    meradat.onOpen()
+    baratron.onOpen()
 
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств
