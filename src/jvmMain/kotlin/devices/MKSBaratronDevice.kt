@@ -4,6 +4,7 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import space.kscience.controls.api.Device
@@ -55,20 +56,23 @@ class MKSBaratronDevice(context: Context, meta: Meta): DeviceBySpec<IMKSBaratron
             val input = socket.openReadChannel()
             println("---------- connected")
             val sendChannel = socket.openWriteChannel(autoFlush = true)
-            while (true) {
-                sendChannel.writeFully("AV$channel\r".toByteArray())
-                val reading = input.readUTF8Line()
-                if (reading.isNullOrEmpty()) {
-                    //                invalidateState("connection");
-                    println("No connection")
+            launch {
+                while (true) {
+                    sendChannel.writeFully("AV$channel\r".toByteArray())
+                    val array: ByteArray = byteArrayOf()
+                    val reading = input.readFully(array).toString()
+                    if (reading.isEmpty()) {
+                        //                invalidateState("connection");
+                        println("No connection")
+                    }
+                    val res = java.lang.Double.parseDouble(reading)
+                    if (res <= 0) {
+                        println("Non positive")
+                    } else {
+                        write(device_pressure, res)
+                    }
+                    //write(device_pressure, reading!!)
                 }
-                val res = java.lang.Double.parseDouble(reading)
-                if (res <= 0) {
-                    println("Non positive")
-                } else {
-                    write(device_pressure, res)
-                }
-                //write(device_pressure, reading!!)
             }
         }
     }

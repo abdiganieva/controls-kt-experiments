@@ -49,10 +49,9 @@ suspend fun main(): Unit = coroutineScope {
     val baratron = MKSBaratronDevice.build(context, Meta.EMPTY)
 
     // register device and open it
-    manager.install("demo", device)
-    manager.install("cm32", CM32device)
+    //manager.install("demo", device)
+    //manager.install("cm32", CM32device)
     manager.install("meradat", meradat)
-    manager.install("baratron", baratron)
 
     // just register device
     // TODO: зачем нужен этот метод?
@@ -65,10 +64,9 @@ suspend fun main(): Unit = coroutineScope {
 
     // Пока девайс с интерфейсом надо запускать вручную (баг)
     // TODO: исправить
-    device.onOpen()
-    CM32device.onOpen()
+    //device.onOpen()
+    //CM32device.onOpen()
     meradat.onOpen()
-    baratron.onOpen()
 
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств

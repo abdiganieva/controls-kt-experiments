@@ -12,11 +12,19 @@ import io.ktor.network.selector.*
 import io.ktor.network.sockets.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
+import java.nio.charset.Charset
 import java.util.regex.Pattern
-
+import kotlin.text.Charsets.US_ASCII
+import space.kscience.controls.ports.*
+import space.kscience.dataforge.meta.get
+import space.kscience.dataforge.meta.int
+import space.kscience.dataforge.meta.string
+import space.kscience.controls.ports.*
 
 interface IMeradatVacDevice: Device {
     //var CONNECTED_STATE: String
@@ -24,6 +32,7 @@ interface IMeradatVacDevice: Device {
     var pressure: Double
     var hostname: String
     var port: Int
+    var address: Int
 
 }
 class MeradatVacDevice(context: Context, meta: Meta): DeviceBySpec<IMeradatVacDevice>(
@@ -33,7 +42,7 @@ Companion, context, meta), IMeradatVacDevice {
     override var pressure: Double = 0.0
     override var hostname: String = "192.168.111.33"
     override var port: Int = 4003
-
+    override var address: Int = 1
 
     companion object : DeviceSpec<IMeradatVacDevice>(), Factory<MeradatVacDevice> {
 
@@ -42,11 +51,13 @@ Companion, context, meta), IMeradatVacDevice {
 
         val device_pressure by mutableProperty(MetaConverter.double, IMeradatVacDevice::pressure)
 
+
         private suspend fun buildTCPConnection(hostname: String, port: Int): Socket {
             println("Connecting to port $hostname:$port")
             return aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
                 .connect(InetSocketAddress(hostname, port))
         }
+
 
         private fun calculateLRC(inputString: String): String {
             /*
@@ -64,36 +75,43 @@ Companion, context, meta), IMeradatVacDevice {
         }
 
         override suspend fun IMeradatVacDevice.onOpen() {
+            val requestBase: String = String.format(":%02d", address)
+            val dataStr = requestBase.substring(1) + REQUEST
+            val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
+            println(query)
+
             val socket = buildTCPConnection(hostname, port)
             val input = socket.openReadChannel()
             println("---------- connected")
-            val requestBase: String = String.format(":%02d", hostname)
-            val dataStr = requestBase.substring(1) + REQUEST
-            val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
+            println("--- opening write channel")
             val sendChannel = socket.openWriteChannel(autoFlush = true)
             val response: Pattern = Pattern.compile(requestBase + "0304(\\w{4})(\\w{4})..\r\n")
-            while (true) {
-                sendChannel.writeFully(query.toByteArray())
-                val reading = input.readUTF8Line()
-                if (reading.isNullOrEmpty()) {
-                    println("No signal")
-                } else {
-                    val match = response.matcher(reading)
-
-                    if (match.matches()) {
-                        val base = Integer.parseInt(match.group(1), 16).toDouble() / 10.0
-                        var exp = Integer.parseInt(match.group(2), 16)
-                        if (exp > 32766) {
-                            exp -= 65536
-                        }
-                        var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
-                        res = res.setScale(4, RoundingMode.CEILING)
-                        write(device_pressure, res.toDouble())
+                while (true) {
+                    println("---- SENDING ----")
+                    println("---- QUERY: ${query.toByteArray(Charsets.US_ASCII).toString(Charsets.US_ASCII)} ---------")
+                    sendChannel.writeFully(":010300000002FA\r\n".toByteArray(Charsets.US_ASCII))
+                    println("--- SENT ---- ")
+                    val array: ByteArray = byteArrayOf()
+                    val data = input.readUTF8Line()
+                    println(data?.length)
+                    if (data.isNullOrEmpty()) {
+                        println("No signal")
                     } else {
-                        println("Wrong answer: $reading")
-                    }
+                        val match = response.matcher(data)
+
+                        if (match.matches()) {
+                            val base = Integer.parseInt(match.group(1), 16).toDouble() / 10.0
+                            var exp = Integer.parseInt(match.group(2), 16)
+                            if (exp > 32766) {
+                                exp -= 65536
+                            }
+                            var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
+                            res = res.setScale(4, RoundingMode.CEILING)
+                            write(device_pressure, res.toDouble())
+                        } else {
+                            println("Wrong answer: $data")
+                        }
                 }
-                //write(device_pressure, reading!!)
             }
         }
     }

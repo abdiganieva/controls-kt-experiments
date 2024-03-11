@@ -4,86 +4,10 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT">
-            <builds>
-              <build path="$PROJECT_DIR$/../../controls-kt" name="controls-kt">
-                <projects>
-                  <project path="$PROJECT_DIR$/../../controls-kt" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-constructor" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-core" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-jupyter" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-magix" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-modbus" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-opcua" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-pi" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-ports-ktor" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-serial" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-server" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-storage" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-storage/controls-xodus" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/controls-vision" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/all-things" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/car" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/constructor" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/echo" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/magix-demo" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/many-devices" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/mks-pdr900" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/demo/motors" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-api" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-java-endpoint" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-mqtt" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-rabbit" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-rsocket" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-server" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-storage" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-storage/magix-storage-xodus" />
-                  <project path="$PROJECT_DIR$/../../controls-kt/magix/magix-zmq" />
-                </projects>
-              </build>
-            </builds>
-          </compositeBuild>
-        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/../../controls-kt" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-constructor" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-core" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-jupyter" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-magix" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-modbus" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-opcua" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-pi" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-ports-ktor" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-serial" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-server" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-storage" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-storage/controls-xodus" />
-            <option value="$PROJECT_DIR$/../../controls-kt/controls-vision" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/all-things" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/car" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/constructor" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/echo" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/magix-demo" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/many-devices" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/mks-pdr900" />
-            <option value="$PROJECT_DIR$/../../controls-kt/demo/motors" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-api" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-java-endpoint" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-mqtt" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-rabbit" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-rsocket" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-server" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-storage" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-storage/magix-storage-xodus" />
-            <option value="$PROJECT_DIR$/../../controls-kt/magix/magix-zmq" />
             <option value="$PROJECT_DIR$" />
           </set>
         </option>
