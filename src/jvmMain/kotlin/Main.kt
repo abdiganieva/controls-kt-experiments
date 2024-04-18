@@ -1,13 +1,14 @@
 import devices.*
 import devices.CM32Device.Companion.onOpen
 import devices.MKSBaratronDevice.Companion.onOpen
-import devices.MeradatVacDevice.Companion.onOpen
 import devices.SinCosDevice.Companion.onOpen
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.html.I
 import space.kscience.controls.api.onPropertyChange
 import space.kscience.controls.api.propertyMessageFlow
+import space.kscience.controls.client.controlsPropertyFlow
 import space.kscience.controls.client.launchMagixService
 import space.kscience.controls.manager.DeviceManager
 import space.kscience.controls.manager.install
@@ -17,6 +18,7 @@ import space.kscience.controls.spec.write
 import space.kscience.dataforge.context.Context
 import space.kscience.dataforge.context.request
 import space.kscience.dataforge.meta.Meta
+import space.kscience.dataforge.names.Name
 import space.kscience.magix.api.MagixEndpoint
 import space.kscience.magix.rsocket.rSocketWithWebSockets
 import space.kscience.magix.server.RSocketMagixFlowPlugin
@@ -46,7 +48,7 @@ suspend fun main(): Unit = coroutineScope {
     // QUESTION: можно ли типизировать мету для устройства?
     //val device = SinCosDevice.build(context, Meta.EMPTY)
     //val CM32device = CM32Device.build(context, Meta.EMPTY)
-    val meradat = MeradatVacDevice.build(context, Meta.EMPTY)
+    val meradat = MeradatVacDevice(context, Meta.EMPTY)
     //val baratron = MKSBaratronDevice.build(context, Meta.EMPTY)
 
     // register device and open it
@@ -67,7 +69,7 @@ suspend fun main(): Unit = coroutineScope {
     // TODO: исправить
     //device.onOpen()
     //CM32device.onOpen()
-    meradat.onOpen()
+    //meradat.onOpen()
 
     // Start magix (?) server (web ui = http://localhost:7776)
     // Поднимаем веб интерфейс менеджера устройств
@@ -156,6 +158,5 @@ suspend fun main(): Unit = coroutineScope {
         )
         manager.launchMagixService(magixEndpoint)
     }
-
     // см пример управления девайсом через Magix в [RemoteDevice.kt](./commands/RemoteDevice.kt)
 }

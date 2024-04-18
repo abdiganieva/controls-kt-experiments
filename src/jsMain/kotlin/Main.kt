@@ -1,5 +1,6 @@
 package commands
 
+import devices.IMeradatVacDevice
 import devices.ISinCosDevice
 import io.ktor.client.engine.js.*
 import kotlinx.coroutines.coroutineScope
@@ -27,10 +28,10 @@ suspend fun main(): Unit = coroutineScope {
     run {
         val client = StorageClient(Js)
         val start = (Clock.System.now() - 60.seconds).toLocalDateTime(TimeZone.currentSystemDefault())
-        val out = client.read("demo", ISinCosDevice.sin, start=start)
-
+        //val out = client.read("meradat", IMeradatVacDevice.pressure, start=start)
+        //plot(client.read("meradat", ))
         // отображение графика
-        TODO()
+        //TODO()
         //val x = out.map { it.first.toString() }.toTypedArray()
         //val y = out.map { it.second }.toTypedArray()
         //plotHistory(x, y)
@@ -40,13 +41,17 @@ suspend fun main(): Unit = coroutineScope {
     val sendEndpoint = MagixEndpoint.rSocketWithWebSockets(
         "localhost", 7777
     )
-
-    val res = launch {
+    println("--before launch")
+    /*launch {
         val container = mutableListOf<Double>()
+        println("----b4 send endpoint")
         sendEndpoint.controlsPropertyFlow(
-            "controls-kt", Name.of("demo"), ISinCosDevice.sin).collect {
+            "controls-kt", Name.of("meradat"), IMeradatVacDevice.pressure).collect {
+                println("---- FLOW $it")
             container += it
+            println("b4 plot")
             plot(container.toTypedArray())
+            println("after plot")
         }
-    }
+    } */
 }

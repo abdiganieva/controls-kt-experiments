@@ -30,17 +30,20 @@ import java.net.ConnectException
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
-class MeradatVacDevice(context: Context, meta: Meta): DeviceBySpec<IMeradatVacDevice>(
-Companion, context, meta), IMeradatVacDevice {
+class MeradatVacDevice(context: Context, meta: Meta): DeviceBySpec<IMeradatVacDevice>(IMeradatVacDevice, context, meta), IMeradatVacDevice {
 
     //override var CONNECTED_STATE: String = TODO()
     override var hostname: String = "192.168.111.33"
     override var port: Int = 4003
     override var address: Int = 1
 
+    private val REQUEST = "0300000002"
+    var sendChannel: ByteWriteChannel? = null
+    var readChannel: ByteReadChannel? = null
+
     override suspend fun pressureValue(): Double {
         // building TCP connection
-        var socket = buildTCPConnection(hostname, port)
+        val socket = buildTCPConnection(hostname, port)
         readChannel = socket.openReadChannel()
         sendChannel = socket.openWriteChannel(autoFlush = true)
         println("---------- connected")
@@ -62,52 +65,45 @@ Companion, context, meta), IMeradatVacDevice {
             var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
             res = res.setScale(4, RoundingMode.CEILING)
             println("--- CORRECT! --- $res")
-            return res.toDouble()
+            socket.close()
+            return res.toDouble() + 0.00000000001 * Random.nextInt(1,9)
         } else {
             println("Wrong answer: $receivedData")
+            socket.close()
             return 0.0
         }
     }
 
-    companion object : DeviceSpec<IMeradatVacDevice>(), Factory<MeradatVacDevice> {
-
-        private const val REQUEST = "0300000002"
-        var sendChannel: ByteWriteChannel? = null
-        var readChannel: ByteReadChannel? = null
-
-        override fun build(context: Context, meta: Meta): MeradatVacDevice = MeradatVacDevice(context, meta)
+    private suspend fun buildTCPConnection(hostname: String, port: Int): Socket {
+        println("Connecting to port $hostname:$port")
+        return aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
+            .connect(InetSocketAddress(hostname, port))
+    }
 
 
-        private suspend fun buildTCPConnection(hostname: String, port: Int): Socket {
-            println("Connecting to port $hostname:$port")
-            return aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
-                .connect(InetSocketAddress(hostname, port))
+    private fun calculateLRC(inputString: String): String {
+        /*
+     * String is Hex String, need to convert in ASCII.
+     */
+        val bytes = BigInteger(inputString, 16).toByteArray()
+        val checksum = bytes.sumOf { it.toInt() }
+        var value = Integer.toHexString(-checksum)
+        value = value.substring(value.length - 2).uppercase()
+        if (value.length < 2) {
+            value = "0$value"
         }
 
+        return value
+    }
 
-        private fun calculateLRC(inputString: String): String {
-            /*
-         * String is Hex String, need to convert in ASCII.
-         */
-            val bytes = BigInteger(inputString, 16).toByteArray()
-            val checksum = bytes.sumOf { it.toInt() }
-            var value = Integer.toHexString(-checksum)
-            value = value.substring(value.length - 2).uppercase()
-            if (value.length < 2) {
-                value = "0$value"
-            }
-
-            return value
+    private suspend fun sendAndWait(query: String, predicate: (String) -> Boolean = { true }): String {
+        sendChannel?.writeFully(query.toByteArray())
+        var reading: String? = null
+        while (reading.isNullOrEmpty() || !predicate(reading)) {
+            reading = readChannel?.readUTF8Line()
         }
-
-        private suspend fun sendAndWait(query: String, predicate: (String) -> Boolean = { true }): String {
-            sendChannel?.writeFully(query.toByteArray())
-            var reading: String? = null
-            while (reading.isNullOrEmpty() || !predicate(reading)) {
-                reading = readChannel?.readUTF8Line()
-            }
-            return reading
-        }
+        return reading
+    }
 
 
         // launch {
@@ -154,5 +150,4 @@ Companion, context, meta), IMeradatVacDevice {
                 }
             }
         } */
-    }
 }
