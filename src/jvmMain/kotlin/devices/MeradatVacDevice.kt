@@ -25,6 +25,7 @@ import space.kscience.dataforge.meta.get
 import space.kscience.dataforge.meta.int
 import space.kscience.dataforge.meta.string
 import space.kscience.controls.ports.*
+import java.net.ConnectException
 
 interface IMeradatVacDevice: Device {
     //var CONNECTED_STATE: String
@@ -47,6 +48,9 @@ Companion, context, meta), IMeradatVacDevice {
     companion object : DeviceSpec<IMeradatVacDevice>(), Factory<MeradatVacDevice> {
 
         private const val REQUEST = "0300000002"
+        var sendChannel: ByteWriteChannel? = null
+        var readChannel: ByteReadChannel? = null
+
         override fun build(context: Context, meta: Meta): MeradatVacDevice = MeradatVacDevice(context, meta)
 
         val device_pressure by mutableProperty(MetaConverter.double, IMeradatVacDevice::pressure)
@@ -74,30 +78,31 @@ Companion, context, meta), IMeradatVacDevice {
             return value
         }
 
-        override suspend fun IMeradatVacDevice.onOpen() {
-            val requestBase: String = String.format(":%02d", address)
-            val dataStr = requestBase.substring(1) + REQUEST
-            val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
-            println(query)
+        private suspend fun sendAndWait(query: String, predicate: (String) -> Boolean = { true }): String {
+            sendChannel?.writeFully(query.toByteArray())
+            var reading: String? = null
+            while (reading.isNullOrEmpty() || !predicate(reading)) {
+                reading = readChannel?.readUTF8Line()
+            }
+            return reading
+        }
 
-            val socket = buildTCPConnection(hostname, port)
-            val input = socket.openReadChannel()
-            println("---------- connected")
-            println("--- opening write channel")
-            val sendChannel = socket.openWriteChannel(autoFlush = true)
-            val response: Pattern = Pattern.compile(requestBase + "0304(\\w{4})(\\w{4})..\r\n")
+        override suspend fun IMeradatVacDevice.onOpen() {
+            launch {
+                var socket = buildTCPConnection(hostname, port)
+                readChannel = socket.openReadChannel()
+                sendChannel = socket.openWriteChannel(autoFlush = true)
+                println("---------- connected")
+                val requestBase: String = String.format(":%02d", address)
+                val dataStr = requestBase.substring(1) + REQUEST
+                val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
+                val response: Pattern = Pattern.compile(requestBase + "0304(\\w{4})(\\w{4})..") // removed \r\n from the end of the line idk why but it works now
                 while (true) {
-                    println("---- SENDING ----")
-                    println("---- QUERY: ${query.toByteArray(Charsets.US_ASCII).toString(Charsets.US_ASCII)} ---------")
-                    sendChannel.writeFully(":010300000002FA\r\n".toByteArray(Charsets.US_ASCII))
-                    println("--- SENT ---- ")
-                    val array: ByteArray = byteArrayOf()
-                    val data = input.readUTF8Line()
-                    println(data?.length)
-                    if (data.isNullOrEmpty()) {
-                        println("No signal")
-                    } else {
-                        val match = response.matcher(data)
+                    try {
+                        Thread.sleep(1000)
+                        val receivedData = sendAndWait(query) { phrase -> phrase.startsWith(requestBase) }
+
+                        val match = response.matcher(receivedData)
 
                         if (match.matches()) {
                             val base = Integer.parseInt(match.group(1), 16).toDouble() / 10.0
@@ -107,12 +112,21 @@ Companion, context, meta), IMeradatVacDevice {
                             }
                             var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
                             res = res.setScale(4, RoundingMode.CEILING)
+                            println("--- CORRECT! --- $res")
                             write(device_pressure, res.toDouble())
                         } else {
-                            println("Wrong answer: $data")
+                            println("Wrong answer: $receivedData")
                         }
+                    } catch (e: ConnectException) {
+                        socket.close()
+                        socket = buildTCPConnection(hostname, port)
+                        readChannel = socket.openReadChannel()
+                        sendChannel = socket.openWriteChannel(autoFlush = true)
+                        println("---------- reconnected")
+                    }
+                    //write(device_pressure, reading!!)
                 }
             }
-        }
+        }    
     }
 }

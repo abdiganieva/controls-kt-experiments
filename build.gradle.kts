@@ -18,6 +18,10 @@ repositories {
 val controlsVersion = "0.3.0"
 val ktorVersion = "2.3.7"
 
+application {
+    mainClass = "MainKt"
+}
+
 kotlin {
 
     explicitApi = null

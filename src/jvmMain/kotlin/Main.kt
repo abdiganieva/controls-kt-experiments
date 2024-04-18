@@ -24,6 +24,7 @@ import space.kscience.magix.server.startMagixServer
 import storage.startStorage
 import kotlin.io.path.Path
 
+
 /// Create demo device and Magix server
 //  and connect to each other inside one program
 // Эта программа:
@@ -43,10 +44,10 @@ suspend fun main(): Unit = coroutineScope {
 
     // создание тестового устройства
     // QUESTION: можно ли типизировать мету для устройства?
-    val device = SinCosDevice.build(context, Meta.EMPTY)
-    val CM32device = CM32Device.build(context, Meta.EMPTY)
+    //val device = SinCosDevice.build(context, Meta.EMPTY)
+    //val CM32device = CM32Device.build(context, Meta.EMPTY)
     val meradat = MeradatVacDevice.build(context, Meta.EMPTY)
-    val baratron = MKSBaratronDevice.build(context, Meta.EMPTY)
+    //val baratron = MKSBaratronDevice.build(context, Meta.EMPTY)
 
     // register device and open it
     //manager.install("demo", device)
@@ -75,8 +76,10 @@ suspend fun main(): Unit = coroutineScope {
     // TODO: поменять дефолтный порт, чтобы он не конфликтовал с Magix server
     startDeviceServer(manager, port = 7776)
 
+    while (true) {}
+
     // Подключение самодельного хранилища истории свойств девайса
-    manager.startStorage(8080, Path("data/controls-kt"))
+    manager.startStorage(8080, Path("data/controls-kt")) 
 
     /// Запуск Magix сервера
     // Без доп плагинов будет запущен websocket сервер на порте 7777.
@@ -88,16 +91,18 @@ suspend fun main(): Unit = coroutineScope {
     )
 
     // Примеры управления девайсом напрямую (не через Magix)
+    /* 
     run {
         println("""
         ${device.propertyDescriptors}
         ${device.actionDescriptors}
         """.trimIndent())
     }
-
+    */
     // 1. Управление девайсом по его интерфейсу
     // Я так и не понял, правильное это использование или нет
     // и зачем вообще нужен интерфейс устройства
+    /* 
     run {
         val time = device.time()
         val sinScale = device.sinScaleState
@@ -128,15 +133,16 @@ suspend fun main(): Unit = coroutineScope {
         // изменение аттрибута устройства
         device.write(ISinCosDevice.sinScale, 2.0)
     }
+    */
 
     // Подписка на все изменения
-    device.onPropertyChange {
+    meradat.onPropertyChange {
         println("catch general prop change: $this")
     }
 
     // Подписка на конкретное изменение
-    device.propertyMessageFlow("sin").onEach {
-        println("catch specific prop change (sin): $it")
+    meradat.propertyMessageFlow("device_pressure").onEach {
+        println("catch specific prop change (device_pressure): $it")
     }.launchIn(this)
 
 

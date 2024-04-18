@@ -42,37 +42,47 @@ class MKSBaratronDevice(context: Context, meta: Meta): DeviceBySpec<IMKSBaratron
 
         val device_pressure by mutableProperty(MetaConverter.double, IMKSBaratronDevice::pressure)
 
+        var sendChannel: ByteWriteChannel? = null
+        var readChannel: ByteReadChannel? = null
+
         private suspend fun buildTCPConnection(hostname: String, port: Int): Socket {
             println("Connecting to port $hostname:$port")
             return aSocket(ActorSelectorManager(Dispatchers.IO)).tcp()
                 .connect(InetSocketAddress(hostname, port))
         }
 
-        suspend fun send() {
-
+        private suspend fun sendAndWait(query: String, predicate: (String) -> Boolean = { true }): String {
+            sendChannel?.writeFully(query.toByteArray())
+            var reading: String? = null
+            while (reading.isNullOrEmpty() || !predicate(reading)) {
+                reading = readChannel?.readUTF8Line()
+            }
+            return reading
         }
+
+
         override suspend fun IMKSBaratronDevice.onOpen() {
             val socket = buildTCPConnection(hostname, port)
-            val input = socket.openReadChannel()
+            readChannel = socket.openReadChannel()
             println("---------- connected")
-            val sendChannel = socket.openWriteChannel(autoFlush = true)
-            launch {
-                while (true) {
-                    sendChannel.writeFully("AV$channel\r".toByteArray())
-                    val array: ByteArray = byteArrayOf()
-                    val reading = input.readFully(array).toString()
-                    if (reading.isEmpty()) {
-                        //                invalidateState("connection");
-                        println("No connection")
-                    }
-                    val res = java.lang.Double.parseDouble(reading)
-                    if (res <= 0) {
-                        println("Non positive")
-                    } else {
-                        write(device_pressure, res)
-                    }
-                    //write(device_pressure, reading!!)
+            sendChannel = socket.openWriteChannel(autoFlush = true)
+
+            while (true) {
+                val receivedData = sendAndWait("AV$channel\r")
+                /*
+                if (reading.isEmpty()) {
+                    //                invalidateState("connection");
+                    println("No connection")
                 }
+                */
+                val res = java.lang.Double.parseDouble(receivedData)
+                if (res <= 0) {
+                    println("Non positive")
+                } else {
+                    println("RESULT: $res")
+                    write(device_pressure, res)
+                }
+                //write(device_pressure, reading!!)
             }
         }
     }
