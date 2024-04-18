@@ -14,6 +14,7 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -26,24 +27,47 @@ import space.kscience.dataforge.meta.int
 import space.kscience.dataforge.meta.string
 import space.kscience.controls.ports.*
 import java.net.ConnectException
+import kotlin.random.Random
+import kotlin.time.Duration.Companion.seconds
 
-interface IMeradatVacDevice: Device {
-    //var CONNECTED_STATE: String
-    fun time(): Instant = Clock.System.now()
-    var pressure: Double
-    var hostname: String
-    var port: Int
-    var address: Int
-
-}
 class MeradatVacDevice(context: Context, meta: Meta): DeviceBySpec<IMeradatVacDevice>(
 Companion, context, meta), IMeradatVacDevice {
 
     //override var CONNECTED_STATE: String = TODO()
-    override var pressure: Double = 0.0
     override var hostname: String = "192.168.111.33"
     override var port: Int = 4003
     override var address: Int = 1
+
+    override suspend fun pressureValue(): Double {
+        // building TCP connection
+        var socket = buildTCPConnection(hostname, port)
+        readChannel = socket.openReadChannel()
+        sendChannel = socket.openWriteChannel(autoFlush = true)
+        println("---------- connected")
+        val requestBase: String = String.format(":%02d", address)
+        val dataStr = requestBase.substring(1) + REQUEST
+        val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
+        val response: Pattern =
+            Pattern.compile(requestBase + "0304(\\w{4})(\\w{4})..") // removed \r\n from the end of the line idk why but it works now
+        val receivedData = sendAndWait(query) { phrase -> phrase.startsWith(requestBase) }
+
+        val match = response.matcher(receivedData)
+
+        if (match.matches()) {
+            val base = Integer.parseInt(match.group(1), 16).toDouble() / 10.0
+            var exp = Integer.parseInt(match.group(2), 16)
+            if (exp > 32766) {
+                exp -= 65536
+            }
+            var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
+            res = res.setScale(4, RoundingMode.CEILING)
+            println("--- CORRECT! --- $res")
+            return res.toDouble()
+        } else {
+            println("Wrong answer: $receivedData")
+            return 0.0
+        }
+    }
 
     companion object : DeviceSpec<IMeradatVacDevice>(), Factory<MeradatVacDevice> {
 
@@ -52,8 +76,6 @@ Companion, context, meta), IMeradatVacDevice {
         var readChannel: ByteReadChannel? = null
 
         override fun build(context: Context, meta: Meta): MeradatVacDevice = MeradatVacDevice(context, meta)
-
-        val device_pressure by mutableProperty(MetaConverter.double, IMeradatVacDevice::pressure)
 
 
         private suspend fun buildTCPConnection(hostname: String, port: Int): Socket {
@@ -87,8 +109,9 @@ Companion, context, meta), IMeradatVacDevice {
             return reading
         }
 
-        override suspend fun IMeradatVacDevice.onOpen() {
-            launch {
+
+        // launch {
+        /*
                 var socket = buildTCPConnection(hostname, port)
                 readChannel = socket.openReadChannel()
                 sendChannel = socket.openWriteChannel(autoFlush = true)
@@ -97,7 +120,9 @@ Companion, context, meta), IMeradatVacDevice {
                 val dataStr = requestBase.substring(1) + REQUEST
                 val query = requestBase + REQUEST + calculateLRC(dataStr) + "\r\n" // ":010300000002FA\r\n";
                 val response: Pattern = Pattern.compile(requestBase + "0304(\\w{4})(\\w{4})..") // removed \r\n from the end of the line idk why but it works now
+
                 while (true) {
+
                     try {
                         Thread.sleep(1000)
                         val receivedData = sendAndWait(query) { phrase -> phrase.startsWith(requestBase) }
@@ -113,7 +138,8 @@ Companion, context, meta), IMeradatVacDevice {
                             var res = BigDecimal.valueOf(base * Math.pow(10.0, exp.toDouble()))
                             res = res.setScale(4, RoundingMode.CEILING)
                             println("--- CORRECT! --- $res")
-                            write(device_pressure, res.toDouble())
+                            write(device_pressure, Random.nextDouble().toDouble())
+                            read(device_pressure)
                         } else {
                             println("Wrong answer: $receivedData")
                         }
@@ -127,6 +153,6 @@ Companion, context, meta), IMeradatVacDevice {
                     //write(device_pressure, reading!!)
                 }
             }
-        }    
+        } */
     }
 }

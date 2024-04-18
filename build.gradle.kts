@@ -68,6 +68,8 @@ kotlin {
                 implementation("io.ktor:ktor-server-core:$ktorVersion")
                 // зависимости, необходимые для реализации storage
                 implementation("io.ktor:ktor-client-cio:$ktorVersion")
+                //implementation("io.ktor:ktor-client-rsocket:$ktorVersion")
+                implementation("io.rsocket.kotlin:rsocket-ktor-client:0.15.4")
             }
         }
     }

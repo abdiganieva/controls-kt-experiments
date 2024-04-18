@@ -74,9 +74,9 @@ suspend fun main(): Unit = coroutineScope {
     // NOTE: при одновременной работе c Magix сервером надо поменять порт,
     // чтобы он не конфликтовал с веб сокетами Magix
     // TODO: поменять дефолтный порт, чтобы он не конфликтовал с Magix server
-    startDeviceServer(manager, port = 7776)
+    //startDeviceServer(manager, port = 7776)
 
-    while (true) {}
+    //while (true) {}
 
     // Подключение самодельного хранилища истории свойств девайса
     manager.startStorage(8080, Path("data/controls-kt")) 
@@ -139,6 +139,7 @@ suspend fun main(): Unit = coroutineScope {
     meradat.onPropertyChange {
         println("catch general prop change: $this")
     }
+
 
     // Подписка на конкретное изменение
     meradat.propertyMessageFlow("device_pressure").onEach {
